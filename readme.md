@@ -6,4 +6,3 @@
 
 1. made a new file inside the folder to add my submission report
 <br>
-2.started working on the project
