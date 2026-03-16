@@ -22,8 +22,40 @@ def steering(path: list[dict], state: dict):
 
 
 
+    if len(path) == 0:
+        return 0.0
+
+    x = state["x"]
+    y = state["y"]
+    yaw = state["yaw"]
+    v = np.sqrt(state["vx"]**2 + state["vy"]**2)
+
+    car_loc = np.array([x, y])
+
+    waypoints = np.array([[p["x"], p["y"]] for p in path])
+
+    distances = np.linalg.norm(waypoints - car_loc, axis=1)
+
+    closest_idx = np.argmin(distances)
+
+    lookahead_offset = int(2 + 0.5 * v)
 
 
+target_idx = min(closest_idx + lookahead_offset, len(waypoints) - 1)
+
+    target = waypoints[target_idx]
+
+    target_vec = target - car_loc
+
+    target_yaw = np.arctan2(target_vec[1], target_vec[0])
+
+    alpha = (target_yaw - yaw + np.pi) % (2 * np.pi) - np.pi
+
+    k_p = 1.2
+
+    steer = k_p * alpha
+
+    
 
     steer = 0.0 # Default steer value
     # 0.5 in the max steering angle in radians (about 28.6 degrees)
@@ -32,15 +64,24 @@ def steering(path: list[dict], state: dict):
 
 def throttle_algorithm(target_speed, current_speed, dt):
 
+ error = target_speed - current_speed
 
+    k_p = 0.4
+
+    throttle = k_p * error
+
+    if throttle < 0:
+        brake = -throttle
+        throttle = 0
+    else:
+        brake = 0
 
 
 
     
     
     # generate the output for throttle command
-    throttle = 0
-    brake = 0.0
+    
     # clip throttle and brake to [0, 1]
     return np.clip(throttle, 0.0, 1.0), np.clip(brake, 0.0, 1.0)
 
